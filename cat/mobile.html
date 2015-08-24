@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Node js Chart</title>
+<meta name="viewport" content="width=device-width, user-scalable=1">
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css">
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+	//HTML 문서가 준비가 되면
+	$(document).ready(function(){
+		//변수를 선언합니다.
+		var socket	=	io.connect();
+
+		//이벤트를 연결합니다.
+		socket.on("message",function(data){
+			//추가할 문자열을 만듭니다.
+			var output	=	"";
+			output	+=	"<li>";
+			output	+=	"	<h3>"+data.name+"</h3>";
+			output	+=	"	<h3>"+data.message+"</h3>";
+			output	+=	"	<h3>"+data.data+"</h3>";
+			output	+=	"</li>";
+
+			//문서 객체를 추가합니다.
+			$(output).prependTo("#content");
+			$("#content").listview("refresh");				//jqueryMobile 에서는 li에 데이터 생성후 listview 를 refresh해줘야함.
+		});
+
+		//버튼을 클릭할 때
+		$("button").on("click",function(){
+			socket.emit("message",{
+				 name:$("#name").val()
+				,message:$("#message").val()
+				,data:new Date().toUTCString()
+			})
+		});
+
+	});
+</script>
+</head>
+<body>
+	<!-- 시작페이지 -->
+	<div data-role="page">
+		<div data-role="header">
+			<h1>Socket.io Chat</h1>
+		</div>
+
+		<div data-role="content">
+			<h3>Nick Name</h3>
+			<input id="name" />
+			<a data-role="button" href="#chatpage">Start</a>
+		</div>
+	</div>
+
+	<!-- 채팅페이지 -->
+	<div data-role="page" id="chatpage">
+		<div data-role="header">
+			<h1>Socket.io Chat</h1>
+		</div>
+		<div data-role="content">
+			<input id="message" />
+			<button>Button1</button>
+			<ul id="content" data-role="listview" data-insert="true">
+			</ul>
+		</div>
+	</div>
+
+</body>
+</html>

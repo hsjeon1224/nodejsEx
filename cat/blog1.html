@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Node js Chart</title>
+<style>
+	.footer{
+		width:100%;
+		height:50px;
+		position:fixed;
+		bottom:0;
+	}
+</style>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+	var    serverURL	=    "127.0.0.1:52273"
+	var    name    		=    "jin";
+	var    room			=	 "1002";
+
+	$(document).ready(function(){
+		//변수를 선언합니다.
+		var socket	=	io.connect();
+
+		//서버 -> 클라이언트 connection 이벤트 응답
+		socket.on("connection",function(data){
+			if(data.type   ==   "connected"){
+				socket.emit("connection",{					//클라이언트 -> 서버  connection 이벤트 요청
+					type:"join",
+					name:name,
+					room:room
+				});
+			}
+		});
+
+		//서버 -> 클라이언트 system 이벤트 응답
+		socket.on("system",function(data){
+			writeMessage("system","system",data.message);
+		});
+
+		//서버 -> 클라이언트 message 이벤트 응답
+		socket.on("message",function(data){
+			writeMessage("other",data.name, data.message);
+		});
+
+		//클라이언트 메세지 버튼 이벤트
+		$("#messageButton").click(function(){
+			var    message    =    $("#messageInput").val();
+
+			//클라이언트 -> 서버 user 이벤트 요청
+			socket.emit("user",{
+				name:name,
+				message:message
+			});
+
+			//클라이언트 메세지 함수
+			writeMessage("me",name,message);
+		});
+
+		//클라이언트 메세지 함수
+		function writeMessage(type,name,message){
+			var    innerHtml    =    "<div>{message}</div>";
+			var	   printName    =    "";
+
+			if("me" == type){
+				printName    =    name+":";
+			}
+
+			innerHtml    =    innerHtml.replace("{message}",printName+message);
+
+			$(innerHtml).appendTo(".j-message");
+		}
+
+	});
+</script>
+</head>
+<body>
+	<div class="j-message">
+	</div>
+	<div class="j-footer">
+		<table>
+			<tr>
+				<td width="100%">
+					<input id="messageInput" type="text"/>
+				</td>
+				<td>
+					<button id="messageButton" type="submit">전송</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

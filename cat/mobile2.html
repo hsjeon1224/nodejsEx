@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Node js Chart</title>
+<meta name="viewport" content="width=device-width, user-scalable=1">
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" />
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+	//HTML 문서가 준비가 되면
+	$(document).ready(function(){
+
+			$(".wait").hide();
+      $(".chat").hide();
+
+			//소켓 서버에 접속
+	    var socket	=	io.connect();
+
+	    //서버 -> 클라이언트 매치가 완료 이벤트
+	    socket.on("completeMatch", function(data) {
+	        console.log("completeMatch!");
+	        $(".loby").hide();
+	        $(".wait").hide();
+	        $(".chat").show();
+	    });
+
+	    //서버 -> 클라이언트 대화 받을때 이벤트
+	    socket.on("receiveMessage", function(data) {
+	    	   console.log("recevie:"+data)
+	    	   console.log(data)
+	        $("#chatResult").append("<li>"+data.message+"</li>");
+	    });
+
+	    //서버 -> 클라이언트 상대방이 나갔을때 이벤트 (자신도 대화방에서 나가게 됨)
+			socket.on("disconnectClienth", function(data) {
+			    console.log("disconnectClienth");
+			    $(".loby").show();
+		      $(".wait").hide();
+		      $(".chat").hide();
+			});
+
+	    //클라이언트 -> 서버 랜덤채팅 요청
+	    $("#requestRandomChatButton").click(function() {
+	        $(".loby").hide();
+	        $(".wait").show();
+	        socket.emit("requestRandomChat");
+	    });
+
+	    //클라이언트 -> 서버 랜덤채팅 요청 취소 요청
+	    $("#cancelRequestRandomChatButton").click(function() {
+	    	  $(".loby").show();
+	        $(".wait").hide();
+	        $(".chat").hide();
+	        socket.emit("cancelRequestRandomChat");
+	    });
+
+	    //클라이언트 -> 서버 메세지 요청
+	    $("#requestMessageButton").click(function() {
+			    var    message    =    $("#messageInput").val();
+
+			    console.log(message)
+
+			    if (message.length < 1) {
+			        alert("내용을 입력해주세요.");
+			        return;
+			    }
+
+			    socket.emit("sendMessage", {									//서버 -> 클라이언트 메세지 요청
+			        	message:message
+			    });
+
+			    $("#messageInput").val("");										//클라이언트 input 엘레멘트 값 초기화
+	    });
+
+	    //클라이언트 -> 서버 채팅방 나가기
+	    $("#requestChatOutButton").click(function() {
+			    socket.emit("disconnectClienth");
+	    });
+
+	});
+</script>
+</head>
+<body>
+		<div class="lobby container" >
+			<button id="requestRandomChatButton" class="btn">채팅입장</button>
+		</div>
+
+		<div class="wait container">
+			<div>상대방을 기다리는 중입니다.....</div>
+			<button id="cancelRequestRandomChatButton">취소</button>
+		</div>
+
+		<div class="chat container">
+				<input type="text" id="messageInput" class="input-medium seach-query"/>
+				<button type="submit" id="requestMessageButton" class="btn">전송</button>
+				<button type="submit" id="requestChatOutButton" class="btn">나가기</button>
+				<ul id="chatResult"></ul>
+		</div>
+</body>
+</html>
