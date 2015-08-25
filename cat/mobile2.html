@@ -11,8 +11,8 @@
 	//HTML 문서가 준비가 되면
 	$(document).ready(function(){
 
-			$(".wait").hide();
-      $(".chat").hide();
+		$(".wait").hide();
+	    $(".chat").hide();
 
 			//소켓 서버에 접속
 	    var socket	=	io.connect();
@@ -33,12 +33,12 @@
 	    });
 
 	    //서버 -> 클라이언트 상대방이 나갔을때 이벤트 (자신도 대화방에서 나가게 됨)
-			socket.on("disconnectClienth", function(data) {
-			    console.log("disconnectClienth");
-			    $(".loby").show();
-		      $(".wait").hide();
-		      $(".chat").hide();
-			});
+		socket.on("disconnectClient", function(data) {
+		   console.log("disconnectClient");
+		   $(".loby").show();
+	       $(".wait").hide();
+	       $(".chat").hide();
+		});
 
 	    //클라이언트 -> 서버 랜덤채팅 요청
 	    $("#requestRandomChatButton").click(function() {
@@ -75,7 +75,12 @@
 
 	    //클라이언트 -> 서버 채팅방 나가기
 	    $("#requestChatOutButton").click(function() {
-			    socket.emit("disconnectClienth");
+			    socket.emit("disconnectClient");
+	    });
+
+	    //클라이언트 -> 서버 현재 방정보 조회
+	    $(".requestClientListInRoomButton").click(function() {
+			    socket.emit("requestClientListInRoom");
 	    });
 
 	});
@@ -84,6 +89,7 @@
 <body>
 		<div class="lobby container" >
 			<button id="requestRandomChatButton" class="btn">채팅입장</button>
+			<button type="submit" class="requestClientListInRoomButton" class="btn">방정보</button>
 		</div>
 
 		<div class="wait container">
@@ -95,6 +101,7 @@
 				<input type="text" id="messageInput" class="input-medium seach-query"/>
 				<button type="submit" id="requestMessageButton" class="btn">전송</button>
 				<button type="submit" id="requestChatOutButton" class="btn">나가기</button>
+				<button type="submit" class="requestClientListInRoomButton" class="btn">방정보</button>
 				<ul id="chatResult"></ul>
 		</div>
 </body>
