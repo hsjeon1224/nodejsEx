@@ -1,108 +1,101 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Node js Chart</title>
-<meta name="viewport" content="width=device-width, user-scalable=1">
-<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" />
-<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script src="/socket.io/socket.io.js"></script>
-<script type="text/javascript">
-	//HTML 문서가 준비가 되면
-	$(document).ready(function(){
-
-		$(".wait").hide();
-	    $(".chat").hide();
-
-			//소켓 서버에 접속
-	    var socket	=	io.connect();
-
-	    //서버 -> 클라이언트 매치가 완료 이벤트
-	    socket.on("completeMatch", function(data) {
-	        console.log("completeMatch!");
-	        $(".loby").hide();
-	        $(".wait").hide();
-	        $(".chat").show();
-	    });
-
-	    //서버 -> 클라이언트 대화 받을때 이벤트
-	    socket.on("receiveMessage", function(data) {
-	    	   console.log("recevie:"+data)
-	    	   console.log(data)
-	        $("#chatResult").append("<li>"+data.message+"</li>");
-	    });
-
-	    //서버 -> 클라이언트 상대방이 나갔을때 이벤트 (자신도 대화방에서 나가게 됨)
-		socket.on("disconnectClient", function(data) {
-		   console.log("disconnectClient");
-		   $(".loby").show();
-	       $(".wait").hide();
-	       $(".chat").hide();
-		});
-
-	    //클라이언트 -> 서버 랜덤채팅 요청
-	    $("#requestRandomChatButton").click(function() {
-	        $(".loby").hide();
-	        $(".wait").show();
-	        socket.emit("requestRandomChat");
-	    });
-
-	    //클라이언트 -> 서버 랜덤채팅 요청 취소 요청
-	    $("#cancelRequestRandomChatButton").click(function() {
-	    	  $(".loby").show();
-	        $(".wait").hide();
-	        $(".chat").hide();
-	        socket.emit("cancelRequestRandomChat");
-	    });
-
-	    //클라이언트 -> 서버 메세지 요청
-	    $("#requestMessageButton").click(function() {
-			    var    message    =    $("#messageInput").val();
-
-			    console.log(message)
-
-			    if (message.length < 1) {
-			        alert("내용을 입력해주세요.");
-			        return;
-			    }
-
-			    socket.emit("sendMessage", {									//서버 -> 클라이언트 메세지 요청
-			        	message:message
-			    });
-
-			    $("#messageInput").val("");										//클라이언트 input 엘레멘트 값 초기화
-	    });
-
-	    //클라이언트 -> 서버 채팅방 나가기
-	    $("#requestChatOutButton").click(function() {
-			    socket.emit("disconnectClient");
-	    });
-
-	    //클라이언트 -> 서버 현재 방정보 조회
-	    $(".requestClientListInRoomButton").click(function() {
-			    socket.emit("requestClientListInRoom");
-	    });
-
-	});
-</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<style type="text/css" media="screen">
+.container
+{
+  width:100%;
+  cursor:default;
+  margin:20px auto;
+  overflow-y:hidden;
+}
+.Area
+{
+  width:70%;
+  background-color:rgba(240, 240, 240, 0.2);
+  display:table;
+  padding:5px;
+  border-radius:5px;
+  margin-bottom:10px;
+}
+.L
+{
+  float:left;
+}
+img
+{
+  width:20px;
+  height:20px;
+  border:2px solid #f0f0ff;
+  padding:5px;
+}
+.R
+{
+    float:right;
+}
+.text
+{
+  color: #a4a4a4;
+  font-family: tahoma;
+  font-size: 12px;
+  font-weight:lighter;
+  line-height: 30px;
+  width:80%;
+  border:1px solid #f0f0f0;
+  background-color:rgba(255, 255, 255, 0.6);
+  padding:1px;
+}
+.Area .note
+{
+  color:#9F6905;
+  font-size:10px;
+}
+a
+{
+  text-decoration:none;
+}
+</style>
 </head>
 <body>
-		<div class="lobby container" >
-			<button id="requestRandomChatButton" class="btn">채팅입장</button>
-			<button type="submit" class="requestClientListInRoomButton" class="btn">방정보</button>
-		</div>
 
-		<div class="wait container">
-			<div>상대방을 기다리는 중입니다.....</div>
-			<button id="cancelRequestRandomChatButton">취소</button>
-		</div>
+<div data-role="page">
+  <div data-role="header">
+    <h1>Welcome To My Homepage</h1>
+  </div>
 
-		<div class="chat container">
-				<input type="text" id="messageInput" class="input-medium seach-query"/>
-				<button type="submit" id="requestMessageButton" class="btn">전송</button>
-				<button type="submit" id="requestChatOutButton" class="btn">나가기</button>
-				<button type="submit" class="requestClientListInRoomButton" class="btn">방정보</button>
-				<ul id="chatResult"></ul>
-		</div>
+  <div data-role="main" class="ui-content">
+		  <div>
+		  	<div class="Area L">
+			    <div class="L">
+			    <img style="float:left;" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrEyVlaWx0_FK_sz86j-CnUC_pfEqw_Xq_xZUm5CMIyEI_-X2hRUpx1BHL"/>
+			    </div>
+			    <div class="text L">
+			    	Hi Mariam, How Are You?
+			    </div>
+
+			  </div>
+
+			  <div class="Area R" style="margin-top: 30px;">
+			    <div class="R" style="margin-right: 0px;">
+			    <img style="float:right;" src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSxU35znsBhAWQd5BouLIVtH1P4WNa0JZ_XXpyViHOIARbM2igbNgC6_kp5"/>
+			    </div>
+			    <div class="text R">Hi Sami, Fine, Thank You, How Are You?
+			    </div>
+			  </div>
+
+		  </div>
+  </div>
+  <div style="">
+  	<div style="width:80%;" class="ui-block-a"><input style="" data-mini="true" type="text" name="message" id="message" value="" data-theme="a"/></div>
+  	<div style="width:20%;" class="ui-block-b"><input type="submit" id="submit" value="Send Message" data-mini="true" data-theme="a"/></div>
+  </div>
+  <div data-role="footer">
+  </div>
+</div>
+
 </body>
 </html>
