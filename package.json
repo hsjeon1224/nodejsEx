@@ -1,6 +1,7 @@
 {
   "name": "userForEach",
   "version": "0.1.0",
+  "private": true,
   "description": "userForEach",
   "main": "hello-world-server.js",
   "scripts": {
@@ -15,4 +16,5 @@
   "author": "",
   "license": "MIT",
   "readmeFilename": "README.md"
+
 }

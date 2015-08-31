@@ -45,7 +45,10 @@ io.sockets.on("connection",function(socket){
 
 				console.log(socket.id+"|유저를 "+roomKey+"방에 입장시킨다.");
 
-				io.sockets.to(roomKey).emit("responseRandomMatch",{});			//서버 -> 클라언트 채팅상대가 매치작업완료 이벤트
+				//서버 -> 클라언트 채팅상대가 매치작업완료 이벤트
+				io.sockets.to(roomKey).emit("responseRandomMatch",{
+					socketId : socket.id
+				});
 
 				return;
 			}
@@ -70,7 +73,17 @@ io.sockets.on("connection",function(socket){
 	//클라이언트 -> 서버 Message 요청
 	socket.on("requestSendMessage", function(data) {
 		socket.get("roomKey", function(error,roomKey) {
-			io.sockets.to(roomKey).emit("responseReceiveMessage",data);
+		    var    clients    =    io.sockets.clients(roomKey);					//현재 방의 클라이언트를 조회
+		    var    responseReceiveMessage    =   {};							//메세지를 담을 object 생성
+		    responseReceiveMessage.Message   =   data.Message;					//메세지 object에 메세지 담기
+			for (var i = 0; i < clients.length; i++){
+	            if (socket.id == clients[i].id) {								//메세지 요청자를 구분한다.
+	            	responseReceiveMessage.IsMyMessage    =   true;
+	            } else {
+	            	responseReceiveMessage.IsMyMessage    =   false;
+	            }
+	            io.sockets.to(roomKey).sockets[clients[i].id].emit("responseReceiveMessage",responseReceiveMessage);
+	        }
 		});
 	});
 	//end 클라이언트 -> 서버 Message 요청

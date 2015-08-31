@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<title>영화권 자리 예매</title>
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+	.line{
+		overflow: hiddn;
+	}
+
+	.seat{
+		margin	: 2px;
+		float		: left;
+		width		: 30px;
+		height	: 30px;
+		border-radius : 3px;
+	}
+
+	.enable {
+		background	: gray;
+	}
+
+	.enable:hover {
+		backgorud		: black;
+	}
+
+	.disable {
+		background	: red;
+	}
+</style>
+<!-- 소켓 생성 -->
+<script type="text/javascript">
+	//소켓 이벤트를 수행합니다.
+	var socket = io.connect();
+
+	//이벤트를 연결합니다.
+	socket.on("reserve", function(data) {
+			var $target = $("div[data-x = "+data.x+"] [data-y = "+data.y+"]");
+			$target.remove("enable");
+			$target.addClass("disable");
+	});
+</script>
+<!-- 초기 좌석 생성 -->
+<script type="text/javascript">
+	$(document).ready( function() {
+			//변수를 선업합니다.
+			  var onClientSeat	=	function() {
+				var x	= $(this).attr("data-x");
+				var y = $(this).attr("data-y");
+
+				if(confirm("좌석을 예약하시겠습니까?")){
+					$(this).off("click");
+					socket.emit("reserve", {
+						x:x,
+						y:y
+					});
+				}else{
+					alert("취소되었습니다.");
+				}
+			};
+
+			//AJAX 수행합니다.
+			$.getJSON("/seats", {dummy: "1"}, function(data) {
+
+				console.log(data);
+
+
+				//좌석을 생성합니다.
+				$.each(data, function(indexY, line){
+					var $line = $("<div></div>").addClass("line");
+					$.each(line, function(indexX, seat) {
+						//문서 객체를 생성하고 변수를 $line에 추가합니다.
+						var $output = $("<div></div>",{
+								 "class" : "seat"
+								,"data-x": indexX
+								,"data-y": indexY
+						}).appendTo($line);
+
+							if (seat == 1) {
+								//좌석이 비어 있으면 enable 클래스와 click 리스터를 추가합니다.
+								$output.addClass("enable").on("click", onClientSeat);
+							} else if (seat == 2) {
+								//좌석이 사용불가능하면 disable 클래스를 추가합니다.
+								$output.addClass("disable");
+							}
+					});
+					//문서 객체를 추가합니다.
+					$line.appendTo("body");
+				});
+			});
+
+	});
+
+</script>
+</head>
+<body>
+
+</body>
+</html>

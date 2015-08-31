@@ -35,7 +35,8 @@
 </style>
 <script type="text/javascript">
 var clientInfo = {
-		chatNameText : ""
+		 chatNameText : ""
+		,socketId			: ""
 }
 
 $(document).ready(function(){
@@ -54,43 +55,41 @@ $(document).ready(function(){
 		$.mobile.changePage("#chatPage");
 	});
 
-	//처음페이지로 이동
-	$("#goBackButton").click(function() {
-		$.mobile.changePage("#loginPage");
-	});
 
 	$( "#chatPage" ).on( "pageshow", function(event) {
-		//소켓 서버에 접속
-		var socket	=	io.connect();
-
-		//서버 -> 클라이언트 매치가 완료 이벤트
+		   //소켓 서버에 접속
+		   var socket	=	io.connect();
+			 $("#incomingMessages").empty();
+		  //서버 -> 클라이언트 매치가 완료 이벤트
 	    socket.on("responseRandomMatch", function(data) {
 	        $.mobile.loading('hide');
+	    });
+	    socket.on("responseDisconnectClient", function(data) {
+	    	 $.mobile.changePage("#loginPage");
 	    });
 
 	    //서버 -> 클라이언트 대화 받을때 이벤트
 	    socket.on("responseReceiveMessage", function(data) {
-	    	$("#incomingMessages").append("<div class='message'><span class='username'>" + data.name + ":</span> " + data.message + "</div>");
+	    		if (data.IsMyMessage) {
+	            $("#incomingMessages").append("<div class='message' align='right'><span class='username'> 나:</span> " + data.Message + "</div>");
+	    		}  else {
+	    			  $("#incomingMessages").append("<div class='message' align='left'><span class='username'> 상대:</span> " + data.Message + "</div>");
+	    		}
 	        $("#incomingMessages").scrollTop($("#incomingMessages")[0].scrollHeight);
 	    });
 
 	    //클라이언트 -> 서버 랜덤채팅 요청
 	    $("#requestRandomChatButton").click(function() {
-	    	$.mobile.loading( 'show', {text: "대상을 찾고 있습니다...",textVisible: "true",theme: "a",html: ''});
+	    	  $.mobile.loading( 'show', {text: "대상을 찾고 있습니다...",textVisible: "true",theme: "a",html: ''});
 	        socket.emit("requestRandomMatch");
 	    });
 
 	    //클라이언트 -> 서버 메세지 요청
 	    $("#requestSendMessageButton").click(function() {
-			    var    message    =    $("#messageText").val();
-
-			    if (message.length < 1) {
-			        alert("내용을 입력해주세요.");
-			        return;
-			    }
+			    var    Message    =    $("#messageText").val();
 
 			    socket.emit("requestSendMessage", {									//서버 -> 클라이언트 메세지 요청
-			        	message:message
+			        Message:Message
 			    });
 
 			    $("#messageText").val("");											//클라이언트 input 엘레멘트 값 초기화
@@ -116,7 +115,7 @@ $(document).ready(function(){
 <body>
 <div data-role="page" id="loginPage" data-theme="a" data-url="loginPage" class="ui-page ui-body-a ui-page-active"  data-position="fixed">
     <div data-role="header" class="ui-bar-a ui-header" role="banner">
-        <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">NowJS Chat</h1>
+        <h1 class="ui-title" tabindex="0" role="heading" aria-level="1">랜덤 챗</h1>
     </div>
 
     <div data-role="content" class="ui-content" role="main">
@@ -128,13 +127,13 @@ $(document).ready(function(){
     </div>
 
         <div data-role="footer" class="ui-bar-a ui-footer" role="contentinfo" data-position="fixed">
-        <h4 class="ui-title" tabindex="0" role="heading" aria-level="1">Giant Flying Saucer</h4>
+        <h4 class="ui-title" tabindex="0" role="heading" aria-level="1">amok8787@gmail.com</h4>
     </div>
 </div>
 
 <div data-role="page" id="chatPage" data-theme="a" data-url="chatPage">
    <div data-role="header">
-        <h1>NowJS Chat</h1>
+        <h1>랜덤 챗</h1>
     </div>
     <div data-role="content">
     <div id="incomingMessages" name="incomingMessages" class="msgContainerDiv">
@@ -143,15 +142,15 @@ $(document).ready(function(){
     <input name="messageText" id="messageText"></input>
         <fieldset class="ui-grid-a">
 	        <div class="ui-block-a">
-	        	<a href="#loginPage" id="goBackButton" data-role="button">Go Back</a>
+	        	<a href="" id="requestDisconnectClientButton" data-role="button">뒤로..</a>
 	        </div>
         	<div class="ui-block-b">
-        		<button data-theme="a" id="requestSendMessageButton" name="requestSendMessageButton">Send</button>
+        		<button data-theme="a" id="requestSendMessageButton" name="requestSendMessageButton">보냄</button>
         	</div>
     	</fieldset>
     </div>
     <div data-role="footer">
-        <h4>Giant Flying Saucer</h4>
+        <h4>amok8787@gmail.com</h4>
     </div>
 </div>
 
